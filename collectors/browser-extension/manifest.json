@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Usagecheck GPT Collector",
+  "version": "0.1.0",
+  "description": "Collects ChatGPT web usage counts and sends them to the central Usagecheck GPT server.",
+  "permissions": ["storage"],
+  "host_permissions": [
+    "https://chatgpt.com/*",
+    "http://localhost:8787/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://chatgpt.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Usagecheck GPT Collector"
+  }
+}
