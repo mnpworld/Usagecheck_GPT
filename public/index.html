@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ChatGPT Usage Check</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero">
+      <div>
+        <p class="eyebrow">USAGECHECK GPT</p>
+        <h1>ChatGPT Usage Monitor</h1>
+        <p class="sub">ตรวจสอบการใช้งานรวมทั้งหมดในจุดเดียว โดยไม่แยกช่องทางที่เข้าใช้งาน</p>
+      </div>
+      <div class="status-dot" id="statusDot"></div>
+    </section>
+
+    <section class="grid">
+      <article class="card primary">
+        <p class="label">การใช้งานวันนี้</p>
+        <div class="metric"><span id="total">0</span><small> / <span id="limit">100</span></small></div>
+        <div class="bar"><div id="barFill"></div></div>
+        <div class="row"><span id="percent">0%</span><span>เหลือ <b id="remaining">100</b> ครั้ง</span></div>
+      </article>
+
+      <article class="card">
+        <p class="label">สถานะ</p>
+        <h2 id="statusText">ปกติ</h2>
+        <p id="statusHelp" class="muted">ยังไม่ถึงระดับแจ้งเตือน</p>
+      </article>
+
+      <article class="card">
+        <p class="label">อัปเดตล่าสุด</p>
+        <h2 id="lastEvent">ยังไม่มีข้อมูล</h2>
+        <p class="muted">ยอดรวมจาก collector ที่เชื่อมต่อทั้งหมด</p>
+      </article>
+    </section>
+
+    <section class="card controls">
+      <div>
+        <p class="label">ตั้งค่า Daily Limit</p>
+        <div class="inline"><input id="limitInput" type="number" min="1" value="100" /><button id="saveLimit">บันทึก</button></div>
+      </div>
+      <div>
+        <p class="label">ทดสอบระบบ</p>
+        <div class="inline"><button id="addOne" class="secondary">+1 Usage</button><button id="resetToday" class="danger">Reset วันนี้</button></div>
+      </div>
+    </section>
+
+    <section class="card info">
+      <h3>รูปแบบ V1</h3>
+      <p>Dashboard นี้แสดงเฉพาะยอดรวม ไม่แยก Browser, App, Device หรือ Channel ในหน้าใช้งานหลัก ข้อมูล source เก็บไว้หลังบ้านเพื่อใช้ตรวจสอบระบบเท่านั้น</p>
+    </section>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>
