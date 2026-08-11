@@ -45,10 +45,12 @@ function cardHtml(item) {
       <div><p class="label">${item.label}</p><div class="metric small-metric">${item.percent}%</div></div>
       <span class="pill ${s.level}">${s.text}</span>
     </div>
+    <p class="muted tiny">Company Usage %</p>
     <div class="bar"><div class="${s.level}" style="width:${Math.min(100, item.percent)}%"></div></div>
-    <div class="row"><span>ใช้ <b>${item.total}</b> / ${item.limit}</span><span>เหลือ <b>${item.remaining}</b></span></div>
-    <div class="limit-row"><label>Limit</label><input data-limit-input="${item.key}" type="number" min="1" value="${item.limit}"><button data-save-limit="${item.key}">บันทึก</button></div>
-    <p class="muted tiny">ล่าสุด: ${item.lastEventAt ? new Date(item.lastEventAt).toLocaleTimeString('th-TH') : 'ยังไม่มีการใช้งานวันนี้'}</p>
+    <div class="row"><span>Observed Usage <b>${item.total}</b></span><span>Company Limit <b>${item.limit}</b></span></div>
+    <div class="row usage-secondary"><span>คงเหลือตาม Company Limit</span><span><b>${item.remaining}</b></span></div>
+    <div class="limit-row"><label>Company Limit</label><input data-limit-input="${item.key}" type="number" min="1" value="${item.limit}"><button data-save-limit="${item.key}">บันทึก</button></div>
+    <p class="muted tiny">Observed ล่าสุด: ${item.lastEventAt ? new Date(item.lastEventAt).toLocaleTimeString('th-TH') : 'ยังไม่มีการใช้งานวันนี้'}</p>
   </article>`;
 }
 
@@ -72,8 +74,8 @@ function render(state) {
   const data = summarize(state);
   $('categoryGrid').innerHTML = CATEGORIES.map((key) => cardHtml(data.categories[key])).join('');
   $('connectionBanner').className = 'banner ok';
-  $('connectionBanner').textContent = '● Realtime Collector เชื่อมต่อแล้ว — ตัวเลขจะอัปเดตทันทีเมื่อมีการใช้งาน';
-  $('storageMode').textContent = `Production mode • Realtime • วันที่ ${data.day} (Asia/Bangkok)`;
+  $('connectionBanner').textContent = '● Realtime Collector เชื่อมต่อแล้ว — Observed Usage จะอัปเดตทันทีเมื่อมีการใช้งาน';
+  $('storageMode').textContent = `Company Usage Monitor • Realtime Observed Usage • วันที่ ${data.day} (Asia/Bangkok)`;
   bindLimitButtons();
 }
 
@@ -81,8 +83,8 @@ function renderOffline() {
   connected = false;
   $('connectionBanner').className = 'banner error';
   $('connectionBanner').textContent = '● Collector Offline — กรุณาติดตั้ง/Reload Usagecheck GPT Collector แล้ว Refresh หน้านี้';
-  $('categoryGrid').innerHTML = CATEGORIES.map((key) => `<article class="card usage-card offline-card"><p class="label">${key === 'chat' ? 'แชททั่วไป' : key === 'image' ? 'สร้างรูปภาพ' : key === 'code' ? 'เขียนโค้ด' : 'Deep Research'}</p><div class="metric small-metric">--%</div><p class="muted">ยังไม่ได้รับข้อมูลจาก Collector</p></article>`).join('');
-  $('storageMode').textContent = 'ไม่มีข้อมูลจำลอง: Production mode จะแสดงเฉพาะข้อมูลที่ Collector ตรวจพบจริง';
+  $('categoryGrid').innerHTML = CATEGORIES.map((key) => `<article class="card usage-card offline-card"><p class="label">${key === 'chat' ? 'แชททั่วไป' : key === 'image' ? 'สร้างรูปภาพ' : key === 'code' ? 'เขียนโค้ด' : 'Deep Research'}</p><div class="metric small-metric">--%</div><p class="muted">ยังไม่ได้รับ Observed Usage จาก Collector</p></article>`).join('');
+  $('storageMode').textContent = 'Production mode: ไม่มีข้อมูลจำลอง และไม่แสดง quota จริงของ OpenAI';
 }
 
 async function connect() {
