@@ -1,10 +1,101 @@
-import { CATEGORIES, defaultState, incrementUsage, resetToday, setCategoryLimit, statusFor, summarize, normalizeState } from './lib/usage-core.js';
-const STORAGE_KEY='usagecheck-gpt-pages-v2',BRIDGE_REQUEST='USAGECHECK_GPT_REQUEST',BRIDGE_RESPONSE='USAGECHECK_GPT_RESPONSE';let bridgeAvailable=false,pending=new Map();const $=id=>document.getElementById(id);
-function localLoad(){try{return normalizeState(JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'))}catch{return defaultState()}}function localSave(s){localStorage.setItem(STORAGE_KEY,JSON.stringify(s));return s}
-function bridgeCall(action,payload={}){return new Promise((resolve,reject)=>{const id=crypto.randomUUID(),timer=setTimeout(()=>{pending.delete(id);reject(new Error('bridge_timeout'))},700);pending.set(id,{resolve,timer});window.postMessage({type:BRIDGE_REQUEST,id,action,payload},'*')})}
-window.addEventListener('message',e=>{if(e.source!==window||e.data?.type!==BRIDGE_RESPONSE)return;const i=pending.get(e.data.id);if(!i)return;clearTimeout(i.timer);pending.delete(e.data.id);bridgeAvailable=true;i.resolve(e.data.result)});
-async function readState(){try{return normalizeState(await bridgeCall('get'))}catch{return localLoad()}}async function mutate(action,payload={}){try{return normalizeState(await bridgeCall(action,payload))}catch{let s=localLoad();if(action==='increment')s=incrementUsage(s,payload.category,payload.count||1);if(action==='setLimit')s=setCategoryLimit(s,payload.category,payload.dailyLimit);if(action==='reset')s=resetToday(s);return localSave(s)}}
-function cardHtml(i){const s=statusFor(i.percent);return `<article class="card usage-card"><div class="card-head"><div><p class="label">${i.label}</p><div class="metric small-metric">${i.percent}%</div></div><span class="pill ${s.level}">${s.text}</span></div><div class="bar"><div class="${s.level}" style="width:${Math.min(100,i.percent)}%"></div></div><div class="row"><span>ใช้ ${i.total} / ${i.limit}</span><span>เหลือ <b>${i.remaining}</b></span></div><div class="limit-row"><label>Limit</label><input data-limit-input="${i.key}" type="number" min="1" value="${i.limit}"><button data-save-limit="${i.key}">บันทึก</button></div><p class="muted tiny">อัปเดตล่าสุด: ${i.lastEventAt?new Date(i.lastEventAt).toLocaleTimeString('th-TH'):'ยังไม่มีข้อมูล'}</p></article>`}
-function bindDynamic(){document.querySelectorAll('[data-save-limit]').forEach(b=>b.addEventListener('click',async()=>{const c=b.dataset.saveLimit,input=document.querySelector(`[data-limit-input="${c}"]`);render(await mutate('setLimit',{category:c,dailyLimit:Number(input.value)}))}))}
-function render(state){const d=summarize(state);$('categoryGrid').innerHTML=CATEGORIES.map(k=>cardHtml(d.categories[k])).join('');const b=$('connectionBanner');b.className=`banner ${bridgeAvailable?'ok':'warning'}`;b.textContent=bridgeAvailable?'เชื่อมต่อ Browser Collector แล้ว — Dashboard ใช้ยอดเดียวกับ Extension':'โหมดทดลองบน GitHub Pages — ยังไม่พบ Browser Collector จึงเก็บยอดไว้ใน Local Storage';$('storageMode').textContent=bridgeAvailable?'ข้อมูลจาก Browser Collector':'ข้อมูล Local Storage ของ GitHub Pages';bindDynamic()}
-async function refresh(){bridgeAvailable=false;render(await readState())}document.querySelectorAll('[data-add]').forEach(b=>b.addEventListener('click',async()=>render(await mutate('increment',{category:b.dataset.add,count:1}))));$('resetToday').addEventListener('click',async()=>{if(confirm('Reset ยอดทุกหมวดของวันนี้เป็น 0?'))render(await mutate('reset'))});refresh();setInterval(refresh,5000);
+import { CATEGORIES, statusFor, summarize, normalizeState } from './lib/usage-core.js';
+
+const BRIDGE_REQUEST = 'USAGECHECK_GPT_REQUEST';
+const BRIDGE_RESPONSE = 'USAGECHECK_GPT_RESPONSE';
+const BRIDGE_PUSH = 'USAGECHECK_GPT_PUSH';
+const $ = (id) => document.getElementById(id);
+let connected = false;
+let pending = new Map();
+let lastState = null;
+
+function bridgeCall(action, payload = {}, timeoutMs = 1200) {
+  return new Promise((resolve, reject) => {
+    const id = crypto.randomUUID();
+    const timer = setTimeout(() => {
+      pending.delete(id);
+      reject(new Error('collector_unavailable'));
+    }, timeoutMs);
+    pending.set(id, { resolve, reject, timer });
+    window.postMessage({ type: BRIDGE_REQUEST, id, action, payload }, '*');
+  });
+}
+
+window.addEventListener('message', (event) => {
+  if (event.source !== window) return;
+  if (event.data?.type === BRIDGE_RESPONSE) {
+    const item = pending.get(event.data.id);
+    if (!item) return;
+    clearTimeout(item.timer);
+    pending.delete(event.data.id);
+    connected = true;
+    item.resolve(event.data.result);
+    return;
+  }
+  if (event.data?.type === BRIDGE_PUSH && event.data?.result) {
+    connected = true;
+    lastState = normalizeState(event.data.result);
+    render(lastState);
+  }
+});
+
+function cardHtml(item) {
+  const s = statusFor(item.percent);
+  return `<article class="card usage-card">
+    <div class="card-head">
+      <div><p class="label">${item.label}</p><div class="metric small-metric">${item.percent}%</div></div>
+      <span class="pill ${s.level}">${s.text}</span>
+    </div>
+    <div class="bar"><div class="${s.level}" style="width:${Math.min(100, item.percent)}%"></div></div>
+    <div class="row"><span>ใช้ <b>${item.total}</b> / ${item.limit}</span><span>เหลือ <b>${item.remaining}</b></span></div>
+    <div class="limit-row"><label>Limit</label><input data-limit-input="${item.key}" type="number" min="1" value="${item.limit}"><button data-save-limit="${item.key}">บันทึก</button></div>
+    <p class="muted tiny">ล่าสุด: ${item.lastEventAt ? new Date(item.lastEventAt).toLocaleTimeString('th-TH') : 'ยังไม่มีการใช้งานวันนี้'}</p>
+  </article>`;
+}
+
+function bindLimitButtons() {
+  document.querySelectorAll('[data-save-limit]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const category = button.dataset.saveLimit;
+      const input = document.querySelector(`[data-limit-input="${category}"]`);
+      try {
+        const result = await bridgeCall('setLimit', { category, dailyLimit: Number(input.value) });
+        lastState = normalizeState(result);
+        render(lastState);
+      } catch {
+        renderOffline();
+      }
+    });
+  });
+}
+
+function render(state) {
+  const data = summarize(state);
+  $('categoryGrid').innerHTML = CATEGORIES.map((key) => cardHtml(data.categories[key])).join('');
+  $('connectionBanner').className = 'banner ok';
+  $('connectionBanner').textContent = '● Realtime Collector เชื่อมต่อแล้ว — ตัวเลขจะอัปเดตทันทีเมื่อมีการใช้งาน';
+  $('storageMode').textContent = `Production mode • Realtime • วันที่ ${data.day} (Asia/Bangkok)`;
+  bindLimitButtons();
+}
+
+function renderOffline() {
+  connected = false;
+  $('connectionBanner').className = 'banner error';
+  $('connectionBanner').textContent = '● Collector Offline — กรุณาติดตั้ง/Reload Usagecheck GPT Collector แล้ว Refresh หน้านี้';
+  $('categoryGrid').innerHTML = CATEGORIES.map((key) => `<article class="card usage-card offline-card"><p class="label">${key === 'chat' ? 'แชททั่วไป' : key === 'image' ? 'สร้างรูปภาพ' : key === 'code' ? 'เขียนโค้ด' : 'Deep Research'}</p><div class="metric small-metric">--%</div><p class="muted">ยังไม่ได้รับข้อมูลจาก Collector</p></article>`).join('');
+  $('storageMode').textContent = 'ไม่มีข้อมูลจำลอง: Production mode จะแสดงเฉพาะข้อมูลที่ Collector ตรวจพบจริง';
+}
+
+async function connect() {
+  try {
+    const result = await bridgeCall('get');
+    connected = true;
+    lastState = normalizeState(result);
+    render(lastState);
+  } catch {
+    renderOffline();
+  }
+}
+
+window.addEventListener('focus', () => { if (!connected) connect(); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden && !connected) connect(); });
+connect();
