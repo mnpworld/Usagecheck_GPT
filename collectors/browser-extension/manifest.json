@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Usagecheck GPT Collector",
-  "version": "0.2.0",
-  "description": "Counts ChatGPT web usage locally and shares the total with the Usagecheck GPT GitHub Pages dashboard.",
+  "version": "1.0.0",
+  "description": "Production realtime ChatGPT usage collector for Usagecheck GPT.",
   "permissions": ["storage"],
   "host_permissions": [
     "https://chatgpt.com/*",
