@@ -1,16 +1,19 @@
 {
   "manifest_version": 3,
   "name": "Usagecheck GPT Collector",
-  "version": "0.1.0",
-  "description": "Collects ChatGPT web usage counts and sends them to the central Usagecheck GPT server.",
+  "version": "0.2.0",
+  "description": "Counts ChatGPT web usage locally and shares the total with the Usagecheck GPT GitHub Pages dashboard.",
   "permissions": ["storage"],
   "host_permissions": [
     "https://chatgpt.com/*",
-    "http://localhost:8787/*"
+    "https://mnpworld.github.io/Usagecheck_GPT/*"
   ],
   "content_scripts": [
     {
-      "matches": ["https://chatgpt.com/*"],
+      "matches": [
+        "https://chatgpt.com/*",
+        "https://mnpworld.github.io/Usagecheck_GPT/*"
+      ],
       "js": ["content.js"],
       "run_at": "document_idle"
     }
