@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Usagecheck GPT — Production</title>
+  <title>Usagecheck GPT — Company Usage</title>
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
@@ -11,8 +11,8 @@
     <section class="hero">
       <div>
         <p class="eyebrow">USAGECHECK GPT • PRODUCTION</p>
-        <h1>ChatGPT Usage Monitor</h1>
-        <p class="sub">Realtime usage จาก Browser Collector แยกเป็น 4 ประเภท</p>
+        <h1>Company Usage Monitor</h1>
+        <p class="sub">Company Usage % จาก Observed Usage ที่ Browser Collector ตรวจพบแบบ realtime แยกเป็น 4 ประเภท</p>
       </div>
     </section>
 
@@ -20,9 +20,10 @@
     <section class="category-grid" id="categoryGrid"></section>
 
     <section class="card info">
-      <h3>Production mode</h3>
-      <p>ระบบนี้ไม่มีข้อมูลจำลองและไม่มีปุ่ม +1 ทดสอบ ตัวเลขจะเพิ่มเฉพาะเมื่อ Browser Collector ตรวจพบการส่ง Prompt จริงบน chatgpt.com และ Dashboard จะรับการเปลี่ยนแปลงแบบ event-driven ทันที</p>
-      <p>เปอร์เซ็นต์ = จำนวนที่ Collector ตรวจพบ ÷ Limit ของหมวดนั้น โดย Limit สามารถแก้ได้จากการ์ดแต่ละหมวด ระบบรีเซ็ตยอดอัตโนมัติเมื่อเปลี่ยนวันตามเวลา Asia/Bangkok</p>
+      <h3>Company Usage % คืออะไร</h3>
+      <p><b>Company Usage % = Observed Usage ที่ Collector ตรวจพบ ÷ Company Limit ของหมวดนั้น</b> ตัวเลขจะเพิ่มเฉพาะเมื่อ Browser Collector ตรวจพบการส่ง Prompt จริงบน chatgpt.com และ Dashboard จะรับการเปลี่ยนแปลงแบบ realtime</p>
+      <p>ตัวเลขนี้เป็นมาตรวัดการใช้งานภายในบริษัท ไม่ใช่ Remaining quota หรือเปอร์เซ็นต์คงเหลือจริงจาก OpenAI โดยตรง คุณสามารถกำหนด Company Limit ของแต่ละหมวดได้จากการ์ดด้านบน</p>
+      <p>ระบบไม่มีข้อมูลจำลอง ไม่มีปุ่ม +1 ทดสอบ และรีเซ็ต Observed Usage อัตโนมัติเมื่อเปลี่ยนวันตามเวลา Asia/Bangkok</p>
       <p id="storageMode" class="muted">กำลังตรวจสอบ Collector…</p>
     </section>
   </main>
