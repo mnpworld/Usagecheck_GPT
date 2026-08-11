@@ -3,43 +3,27 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Usagecheck GPT</title>
+  <title>Usagecheck GPT — Production</title>
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
   <main class="wrap">
     <section class="hero">
       <div>
-        <p class="eyebrow">USAGECHECK GPT</p>
+        <p class="eyebrow">USAGECHECK GPT • PRODUCTION</p>
         <h1>ChatGPT Usage Monitor</h1>
-        <p class="sub">แยกการใช้งานเป็น 4 ประเภท พร้อมเปอร์เซ็นต์และ Limit ของแต่ละหมวด</p>
+        <p class="sub">Realtime usage จาก Browser Collector แยกเป็น 4 ประเภท</p>
       </div>
     </section>
 
-    <section id="connectionBanner" class="banner warning">กำลังตรวจสอบการเชื่อมต่อกับ Browser Collector…</section>
-
+    <section id="connectionBanner" class="banner warning">กำลังเชื่อมต่อ Realtime Collector…</section>
     <section class="category-grid" id="categoryGrid"></section>
 
-    <section class="card controls">
-      <div>
-        <p class="label">ทดสอบระบบ</p>
-        <div class="inline wrap-buttons">
-          <button data-add="chat" class="secondary">+1 แชททั่วไป</button>
-          <button data-add="image" class="secondary">+1 รูปภาพ</button>
-          <button data-add="code" class="secondary">+1 เขียนโค้ด</button>
-          <button data-add="research" class="secondary">+1 Deep Research</button>
-        </div>
-      </div>
-      <div>
-        <p class="label">Reset</p>
-        <button id="resetToday" class="danger">Reset วันนี้ทุกหมวด</button>
-      </div>
-    </section>
-
     <section class="card info">
-      <h3>หมายเหตุสำคัญ</h3>
-      <p>เปอร์เซ็นต์ในหน้านี้คำนวณจาก Limit ที่คุณตั้งเองในแต่ละหมวด ไม่ใช่ Remaining quota จริงจาก OpenAI โดยตรง ตัว Collector จะพยายามแยกประเภทจากโหมด/หน้าที่กำลังใช้งาน และถ้าแยกไม่ได้จะนับเป็น “แชททั่วไป”</p>
-      <p id="storageMode" class="muted">กำลังตรวจสอบแหล่งข้อมูล</p>
+      <h3>Production mode</h3>
+      <p>ระบบนี้ไม่มีข้อมูลจำลองและไม่มีปุ่ม +1 ทดสอบ ตัวเลขจะเพิ่มเฉพาะเมื่อ Browser Collector ตรวจพบการส่ง Prompt จริงบน chatgpt.com และ Dashboard จะรับการเปลี่ยนแปลงแบบ event-driven ทันที</p>
+      <p>เปอร์เซ็นต์ = จำนวนที่ Collector ตรวจพบ ÷ Limit ของหมวดนั้น โดย Limit สามารถแก้ได้จากการ์ดแต่ละหมวด ระบบรีเซ็ตยอดอัตโนมัติเมื่อเปลี่ยนวันตามเวลา Asia/Bangkok</p>
+      <p id="storageMode" class="muted">กำลังตรวจสอบ Collector…</p>
     </section>
   </main>
   <script type="module" src="./app-pages.js"></script>
